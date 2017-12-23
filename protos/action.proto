@@ -1,0 +1,22 @@
+syntax = "proto3";
+package mahjongaction;
+
+message Action {
+        int32 id = 1;
+        int32 direct = 2;
+        enum Action_type {
+        // option allow_alias = true;
+           ACT_INIT = 0;
+           ACT_READY = 1;
+           ACT_GET = 2;
+           ACT_POST = 3;
+           ACT_EAT = 4;
+           ACT_FOUR = 5;
+           ACT_WIN = 6;
+           ACT_ASSIGN = 7;
+           ACT_DONE = 8;
+           }
+        Action_type action_type = 3;
+        string message = 4;
+        string data = 5;
+}

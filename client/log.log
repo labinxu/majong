@@ -1,0 +1,5 @@
+Wed, 13 Dec 2017 21:36:29 player.py[line:57] INFO Connecting to server 127.0.0.1
+Wed, 13 Dec 2017 21:36:29 player.py[line:79] INFO Player id 0
+Wed, 13 Dec 2017 21:36:30 player.py[line:165] DEBUG player 0: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+Wed, 13 Dec 2017 21:36:31 player.py[line:165] DEBUG player 0: Round player is '0'
+Wed, 13 Dec 2017 21:36:32 player.py[line:165] DEBUG player 0: Round player is '0'
