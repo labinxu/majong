@@ -15,6 +15,7 @@ message Action {
            ACT_WIN = 6;
            ACT_ASSIGN = 7;
            ACT_DONE = 8;
+           ACT_PASS = 9;
            }
         Action_type action_type = 3;
         string message = 4;

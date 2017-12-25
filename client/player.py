@@ -117,10 +117,8 @@ class Player():
                 time.sleep(1)
                 continue
             status = self.manager.get_status().lower()
-
             if status == 'get':
                 self.get_new_card()
-
             elif status == 'play':
                 # send card
                 pass

@@ -1,3 +1,11 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
+"""
+@author LBX
+copyright
+"""
+
 from player import Player
 import logging
 import socket
@@ -5,15 +13,19 @@ import multiprocessing
 import threading
 import time
 import signal
+from random import shuffle
 from multiprocessing import Manager
 from protos.action_pb2 import Action
 
-logging.basicConfig(level=logging.DEBUG, format='%(name)s: %(message)s')
+logging.basicConfig(level=logging.INFO, format='%(name)s: %(message)s')
 class XServer(object):
-    def __init__(self):
+    def __init__(self, ip, port, player_number):
         # define four players
         mgr = Manager()
-        self.player_number = 1
+        self.ip = ip
+        self.port = port
+        self.player_number = player_number
+
         self.players = []#mgr.list()
         self.status = None
         self.card_count = 13
@@ -25,6 +37,8 @@ class XServer(object):
 
     def initcards(self):
         self.cards = [i for i in range(1, 109)]
+        shuffle(self.cards)
+        self.index_player = -1
 
     def exit(self):
         self.logger.debug('Close server socket')
@@ -42,6 +56,36 @@ class XServer(object):
                 break
             time.sleep(1)
 
+    def get_next_player(self, index_player):
+        i = index_player + 1
+        if i >= self.player_number:
+            i = i % self.player_number
+
+        # player and index
+        return self.players[i], i
+
+    def parser_action(self, action):
+        # set the player id to unknown
+        action.id = -1
+
+        if action.action_type == Action.ACT_POST:
+            # send the card to next player
+            pass
+
+        elif action.action_type == Action.ACT_PASS:
+            pass
+
+        elif action.action_type == Action.ACT_EAT:
+            pass
+
+        elif action.action_type == Action.ACT_FOUR:
+            # 杠
+            current_card = self.cards[card_index]
+
+        elif action.action_type == Action.ACT_WIN:
+            pass
+        return action
+
     def playing(self, e, players):
         self.logger.info('Waiting players')
         e.wait()
@@ -54,24 +98,63 @@ class XServer(object):
             act.message = 'assigned card'
             beg = i * self.card_count
             end = (i+1) * self.card_count
-            tmpcards = [str(i) for i in self.cards[beg:end] ]
+            tmpcards = [str(j) for j in self.cards[beg:end] ]
             act.data = ','.join(tmpcards)
             self.logger.debug(act.data)
             player.send_action(act)
+            if player.get_next_action().action_type != Action.ACT_DONE:
+                self.logger.error('ASSIGN CARD FAILED')
+                return
 
-        self.cards = self.cards[self.player_number*self.card_count:]
         # assign done
+        current_index_card = self.player_number*self.card_count
+        self.cards = self.cards[current_index_card:]
+        self.cards.reverse()
 
-        active_player = players[0]
-        act = Action()
+        current_card = ''
+        self.drop_cards = []
+        player_index = -1
+
         while True:
-            time.sleep(1)
-            #play
+            active_player, player_index = self.get_next_player(player_index)
+            #post a card to first player
+            act = Action()
             act.id = active_player.id
             act.action_type = Action.ACT_POST
-            act.message = 'POST CARD'
+            act.message = 'POST'
+            current_card = str(self.cards.pop())
+            act.data = current_card
             active_player.send_action(act)
-            next_act = active_player.get_next_action()
+
+            # waiting for next action
+            act = active_player.get_next_action()
+            self.logger.debug(active_player.act2string(act))
+            act = self.parser_action(act)
+            if act.action_type == Action.ACT_WIN:
+                break
+
+            round_index = player_index
+            # round play
+            while True:
+                next_player, round_index = self.get_next_player(round_index)
+                #print('player index %s, round index %s' % (player_index, round_index))
+                if round_index == player_index:
+                    # next round
+                    self.drop_cards.append(int(act.data))
+                    break
+
+                act.id = next_player.id
+                act.action_type = Action.ACT_POST
+                act.message = 'POST'
+                next_player.send_action(act)
+                act =next_player.get_next_action()
+                # default pass
+                continue
+                # if act.action_type == Action.ACT_PASS:
+                #     continue
+                # elif act.action_type == Action.ACT_EAT:
+                #     player_index = round_index
+                #     break
 
     def start(self):
         # waiting for every one ready
@@ -79,15 +162,16 @@ class XServer(object):
                          args=(self.eready, self.players,)).start()
         threading.Thread(target=self.playing,
                          args=(self.eready, self.players,)).start()
+
         threading.Thread(target=self.listenling).start()
 
     def listenling(self):
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR, 1)
-        sock.bind(('127.0.0.1', 20000))
+        sock.bind((self.ip, self.port))
         sock.listen(self.player_number)
         self.sock = sock
-        self.logger.info('starting the server')
+        self.logger.info('starting the server %s %s' % (self.ip, self.port))
         i = 1
         while True:
             s, addr = sock.accept()
@@ -105,7 +189,17 @@ class XServer(object):
             player.start()
             i += 1
 
-if __name__=="__main__":
-    xserver = XServer()
+def command_line():
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-a', '--ip' ,default='127.0.0.1',
+                        help='Linstening to ip address')
+    parser.add_argument('-p', '--port',default='20000', type=int, help='port')
+    parser.add_argument('-P', '--players',default=2, type=int, help='Player number')
+    return parser.parse_args()
 
+if __name__=="__main__":
+    args = command_line()
+    print(args.ip, args.port)
+    xserver = XServer(args.ip, args.port, args.players)
     xserver.start()

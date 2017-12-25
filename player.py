@@ -40,7 +40,6 @@ class Player(Base):
         while True:
             act = self.get_next_action()
             if act.action_type == Action.ACT_READY:
-                print('set status to True')
                 self.playerinfo.status = True
                 break
             time.sleep(1)
@@ -51,9 +50,8 @@ class Player(Base):
         self.sock.sendall(newcard.encode('ascii'))
 
     def get_next_action(self):
-        print('get next action')
         act = self._parse_action(self.active_queue.get())
-        print('geted %s' % self.act2string(act))
+        self.logger.debug('geted :%s' % self.act2string(act))
         return act
 
     def playing(self, sock, logger):

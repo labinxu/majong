@@ -12,7 +12,8 @@ class Base(object):
         pass
 
     def act2string(self, act):
-        s = 'ID:%s, ACT:%s, DIRECT:%s, MSG:%s, DATA:%s'%(act.id, act.action_type,act.direct, act.message, act.data)
+        s = 'ID :%s, ACT: %s, DIRECT:%s, MSG:%s, DATA:%s'%(act.id, act.action_type,act.direct, act.message, act.data)
+
         return s
 
     def _parse_action(self, action_data):
