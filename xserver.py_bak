@@ -5,8 +5,15 @@
 @author LBX
 copyright
 """
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
 
-from player import Player
+"""
+@author LBX
+copyright
+"""
+
+
 import logging
 import socket
 import multiprocessing
@@ -16,6 +23,8 @@ import signal
 from random import shuffle
 from multiprocessing import Manager
 from protos.action_pb2 import Action
+from base import Base
+from player import Player
 
 logging.basicConfig(level=logging.INFO, format='%(name)s: %(message)s')
 class XServer(object):
@@ -25,6 +34,7 @@ class XServer(object):
         self.ip = ip
         self.port = port
         self.player_number = player_number
+        self.index_player = -1
 
         self.players = []#mgr.list()
         self.status = None
@@ -33,13 +43,13 @@ class XServer(object):
         self.eready = multiprocessing.Event()
         signal.signal(signal.SIGINT, self.exit)
         signal.signal(signal.SIGTERM, self.exit)
+        self.card_utils = Base()
         self.initcards()
 
     def initcards(self):
-        self.cards = [i for i in range(1, 109)]
-        shuffle(self.cards)
-        self.index_player = -1
-
+        self.cards = [i for i in range(1, 27)]*4
+        #shuffle(self.cards)
+        self.cards.sort()
     def exit(self):
         self.logger.debug('Close server socket')
         self.sock.close()
@@ -80,10 +90,11 @@ class XServer(object):
 
         elif action.action_type == Action.ACT_FOUR:
             # 杠
-            current_card = self.cards[card_index]
-
+            #current_card = self.cards[card_index]
+            pass
         elif action.action_type == Action.ACT_WIN:
             pass
+
         return action
 
     def playing(self, e, players):
@@ -120,9 +131,10 @@ class XServer(object):
             #post a card to first player
             act = Action()
             act.id = active_player.id
-            act.action_type = Action.ACT_POST
-            act.message = 'POST'
-            current_card = str(self.cards.pop())
+            act.action_type = Action.ACT_GET
+            tmpcard = self.cards.pop()
+            current_card = str(tmpcard)
+            act.message = 'GET@%s' % self.card_utils.get_card_string(tmpcard)
             act.data = current_card
             active_player.send_action(act)
 
@@ -130,31 +142,41 @@ class XServer(object):
             act = active_player.get_next_action()
             self.logger.debug(active_player.act2string(act))
             act = self.parser_action(act)
-            if act.action_type == Action.ACT_WIN:
-                break
+            while True:
+                if act.action_type == Action.ACT_PASS:
+                    break
+                if act.action_type == Action.ACT_ABANDON:
+                    break
+                if act.action_type == Action.ACT_WIN:
+                    break
+
+                if act.action_type == Action.ACT_FOUR:
+                    act = Action()
+                    act.id = active_player.id
+                    act.action_type = Action.ACT_GET
+                    tmpcard = self.cards.pop()
+                    current_card = str(tmpcard)
+                    act.message = 'GET@%s' % self.card_utils.get_card_string(tmpcard)
+                    act.data = current_card
+                    active_player.send_action(act)
+                    act = active_player.get_next_action()
+                    self.logger.debug(active_player.act2string(act))
+                    act = self.parser_action(act)
 
             round_index = player_index
             # round play
             while True:
                 next_player, round_index = self.get_next_player(round_index)
-                #print('player index %s, round index %s' % (player_index, round_index))
                 if round_index == player_index:
                     # next round
                     self.drop_cards.append(int(act.data))
                     break
-
                 act.id = next_player.id
-                act.action_type = Action.ACT_POST
-                act.message = 'POST'
+                act.action_type = Action.ACT_LOOK
+                act.message = 'LOOK@%s' % self.card_utils.get_card_string(tmpcard)
                 next_player.send_action(act)
                 act =next_player.get_next_action()
-                # default pass
                 continue
-                # if act.action_type == Action.ACT_PASS:
-                #     continue
-                # elif act.action_type == Action.ACT_EAT:
-                #     player_index = round_index
-                #     break
 
     def start(self):
         # waiting for every one ready
@@ -195,7 +217,7 @@ def command_line():
     parser.add_argument('-a', '--ip' ,default='127.0.0.1',
                         help='Linstening to ip address')
     parser.add_argument('-p', '--port',default='20000', type=int, help='port')
-    parser.add_argument('-P', '--players',default=2, type=int, help='Player number')
+    parser.add_argument('-P', '--players',default=1, type=int, help='Player number')
     return parser.parse_args()
 
 if __name__=="__main__":

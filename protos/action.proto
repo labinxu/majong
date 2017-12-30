@@ -3,6 +3,7 @@ package mahjongaction;
 
 message Action {
         int32 id = 1;
+
         int32 direct = 2;
         enum Action_type {
         // option allow_alias = true;
@@ -16,8 +17,14 @@ message Action {
            ACT_ASSIGN = 7;
            ACT_DONE = 8;
            ACT_PASS = 9;
+           ACT_LOOK = 10;
+           ACT_ABANDON = 11;
+           ACT_UNKNOWN = 12;
            }
+        
         Action_type action_type = 3;
         string message = 4;
         string data = 5;
+        int32 dest_player = 6;
+
 }

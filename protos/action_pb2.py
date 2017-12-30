@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='action.proto',
   package='mahjongaction',
   syntax='proto3',
-  serialized_pb=_b('\n\x0c\x61\x63tion.proto\x12\rmahjongaction\"\x97\x02\n\x06\x41\x63tion\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x0e\n\x06\x64irect\x18\x02 \x01(\x05\x12\x36\n\x0b\x61\x63tion_type\x18\x03 \x01(\x0e\x32!.mahjongaction.Action.Action_type\x12\x0f\n\x07message\x18\x04 \x01(\t\x12\x0c\n\x04\x64\x61ta\x18\x05 \x01(\t\"\x99\x01\n\x0b\x41\x63tion_type\x12\x0c\n\x08\x41\x43T_INIT\x10\x00\x12\r\n\tACT_READY\x10\x01\x12\x0b\n\x07\x41\x43T_GET\x10\x02\x12\x0c\n\x08\x41\x43T_POST\x10\x03\x12\x0b\n\x07\x41\x43T_EAT\x10\x04\x12\x0c\n\x08\x41\x43T_FOUR\x10\x05\x12\x0b\n\x07\x41\x43T_WIN\x10\x06\x12\x0e\n\nACT_ASSIGN\x10\x07\x12\x0c\n\x08\x41\x43T_DONE\x10\x08\x12\x0c\n\x08\x41\x43T_PASS\x10\tb\x06proto3')
+  serialized_pb=_b('\n\x0c\x61\x63tion.proto\x12\rmahjongaction\"\xdc\x02\n\x06\x41\x63tion\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x0e\n\x06\x64irect\x18\x02 \x01(\x05\x12\x36\n\x0b\x61\x63tion_type\x18\x03 \x01(\x0e\x32!.mahjongaction.Action.Action_type\x12\x0f\n\x07message\x18\x04 \x01(\t\x12\x0c\n\x04\x64\x61ta\x18\x05 \x01(\t\x12\x13\n\x0b\x64\x65st_player\x18\x06 \x01(\x05\"\xc9\x01\n\x0b\x41\x63tion_type\x12\x0c\n\x08\x41\x43T_INIT\x10\x00\x12\r\n\tACT_READY\x10\x01\x12\x0b\n\x07\x41\x43T_GET\x10\x02\x12\x0c\n\x08\x41\x43T_POST\x10\x03\x12\x0b\n\x07\x41\x43T_EAT\x10\x04\x12\x0c\n\x08\x41\x43T_FOUR\x10\x05\x12\x0b\n\x07\x41\x43T_WIN\x10\x06\x12\x0e\n\nACT_ASSIGN\x10\x07\x12\x0c\n\x08\x41\x43T_DONE\x10\x08\x12\x0c\n\x08\x41\x43T_PASS\x10\t\x12\x0c\n\x08\x41\x43T_LOOK\x10\n\x12\x0f\n\x0b\x41\x43T_ABANDON\x10\x0b\x12\x0f\n\x0b\x41\x43T_UNKNOWN\x10\x0c\x62\x06proto3')
 )
 
 
@@ -70,11 +70,23 @@ _ACTION_ACTION_TYPE = _descriptor.EnumDescriptor(
       name='ACT_PASS', index=9, number=9,
       options=None,
       type=None),
+    _descriptor.EnumValueDescriptor(
+      name='ACT_LOOK', index=10, number=10,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='ACT_ABANDON', index=11, number=11,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='ACT_UNKNOWN', index=12, number=12,
+      options=None,
+      type=None),
   ],
   containing_type=None,
   options=None,
-  serialized_start=158,
-  serialized_end=311,
+  serialized_start=179,
+  serialized_end=380,
 )
 _sym_db.RegisterEnumDescriptor(_ACTION_ACTION_TYPE)
 
@@ -121,6 +133,13 @@ _ACTION = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='dest_player', full_name='mahjongaction.Action.dest_player', index=5,
+      number=6, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -135,7 +154,7 @@ _ACTION = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=32,
-  serialized_end=311,
+  serialized_end=380,
 )
 
 _ACTION.fields_by_name['action_type'].enum_type = _ACTION_ACTION_TYPE
