@@ -155,14 +155,17 @@ class XServer(object):
                 continue
 
     def win_game(self, active_player, player_index, card):
-        #active_player.win()
+        act = Action()
+        act.id = active_player.id
+        act.action_type = Action.ACT_WIN
+        active_player.send_action(act)
+
         round_index = player_index
         while True:
             next_player, round_index = self.get_next_player(round_index)
             if round_index == player_index:
                 # next round
                 break
-            act = Action()
             act.id = next_player.id
             act.dest_player = active_player.id
             act.action_type = Action.ACT_WIN
